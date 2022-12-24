@@ -26,10 +26,7 @@ blueprint:
           max: 3600
           unit_of_measurement: seconds
 
-# If motion is detected within the delay,
-# we restart the script.
-mode: restart
-max_exceeded: silent
+mode: single
 
 trigger:
   - platform: state
@@ -56,8 +53,10 @@ action:
         entity_id: !input motion_entity
         state: "off"
     then:
+      - variables:
+          total_second_no_motion_wait: !input no_motion_wait
       - alias: "Wait the number of seconds that has been set"
-        delay: "{{ no_motion_wait - 60 }}"
+        delay: "{{ total_second_no_motion_wait | int - 60 }}"
       - alias: "Check if the motion sensor has been activated in the meantime"
         if:
           - condition: state
