@@ -2,7 +2,7 @@ blueprint:
   name: Sonoff SNZB-03 Motion-activated Light
   description: Turn on a light when motion is detected.
   domain: automation
-  source_url: https://raw.githubusercontent.com/dafo90/home-assistant-blueprints/master/snzb03_motion_light.yaml
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/snzb03_motion_light.yaml
   input:
     motion_entity:
       name: Motion Sensor
