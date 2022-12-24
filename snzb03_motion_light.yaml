@@ -18,11 +18,11 @@ blueprint:
             domain: light
     no_motion_wait:
       name: Wait time
-      description: Time to leave the light on after last motion is detected.
+      description: Time to leave the light on after last motion is detected (60s minimum due to the limitations of the SNZB-03 sensor).
       default: 120
       selector:
         number:
-          min: 0
+          min: 60
           max: 3600
           unit_of_measurement: seconds
 
@@ -57,7 +57,7 @@ action:
         state: "off"
     then:
       - alias: "Wait the number of seconds that has been set"
-        delay: !input no_motion_wait
+        delay: "{{ no_motion_wait - 60 }}"
       - alias: "Check if the motion sensor has been activated in the meantime"
         if:
           - condition: state
