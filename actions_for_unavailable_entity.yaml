@@ -11,6 +11,19 @@ blueprint:
       selector:
         target:
           entity:
+            domain:
+              - binary_sensor
+              - button
+              - climate
+              - cover
+              - device_tracker
+              - fan
+              - light
+              - number
+              - sensor
+              - sun
+              - switch
+              - vacuum
     actions:
       name: Actions
       description: Actions to execute, {{ trigger.event.data.new_state.name }} is replaced with
@@ -36,7 +49,7 @@ trigger:
 condition:
   - condition: template
     value_template: >-
-      {{ trigger.event.data.entity_id not in exclude_entities and 
+      {{ trigger.event.data.entity_id not in exclude_entities.entity_id and 
       trigger.event.data.new_state.state == 'unavailable' and 
       trigger.event.data.old_state.state != 'unknown' }}
 action:
