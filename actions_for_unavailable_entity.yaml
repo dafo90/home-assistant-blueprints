@@ -40,6 +40,19 @@ blueprint:
           max: 100
 variables:
   exclude_entities: !input exclude_entities
+  domains:
+    - binary_sensor
+    - button
+    - climate
+    - cover
+    - device_tracker
+    - fan
+    - light
+    - number
+    - sensor
+    - sun
+    - switch
+    - vacuum
 alias: Execute actions when an entity becomes unavailable
 description: ''
 trigger:
@@ -49,7 +62,8 @@ trigger:
 condition:
   - condition: template
     value_template: >-
-      {{ trigger.event.data.entity_id not in exclude_entities.entity_id and 
+      {{ trigger.event.data.entity_id not in exclude_entities.entity_id and
+      trigger.event.data.new_state.domain in domains and
       trigger.event.data.new_state.state == 'unavailable' and 
       trigger.event.data.old_state.state != 'unknown' }}
 action:
