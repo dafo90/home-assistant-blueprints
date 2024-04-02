@@ -1,0 +1,46 @@
+blueprint:
+  name: Execute actions when an entity becomes unavailable
+  description: Execute actions when an entity becomes unavailable (this is a fork from https://gist.github.com/sagilo/9c5f85794fa8ee3427e7cdab27f573f5)
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/actions_for_unavailable_entity.yaml
+  domain: automation
+  input:
+    exclude_entities:
+      name: Excluded Entities (Optional)
+      description: Choose the entities to be excluded from trigger.
+      default: { entity_id: [] }
+      selector:
+        target:
+          entity:
+    actions:
+      name: Actions
+      description: Actions to execute, {{ trigger.event.data.new_state.name }} is replaced with
+        the unavailable entity name, {{ trigger.event.data.entity_id }} with the id.
+      selector:
+        action: {}
+    max_queued:
+      name: Maximum queued notifications
+      description: A number, in case of multiple events, what should be the queue max depth, defaults to 10
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+variables:
+  exclude_entities: !input exclude_entities
+alias: Execute actions when an entity becomes unavailable
+description: ''
+trigger:
+  - platform: event
+    event_type: state_changed
+    event_data: {}
+condition:
+  - condition: template
+    value_template: >-
+      {{ trigger.event.data.entity_id not in exclude_entities and 
+      trigger.event.data.new_state.state == 'unavailable' and 
+      trigger.event.data.old_state.state != 'unknown' }}
+action:
+  - choose: []
+    default: !input 'actions'
+mode: queued
+max: !input max_queued
