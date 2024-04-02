@@ -7,7 +7,7 @@ blueprint:
     exclude_entities:
       name: Excluded Entities (Optional)
       description: Choose the entities to be excluded from trigger.
-      default: { entity_id: [] }
+      default: []
       selector:
         entity:
           multiple: true
