@@ -9,8 +9,8 @@ blueprint:
       description: Choose the entities to be excluded from trigger.
       default: []
       selector:
-        entity:
-          multiple: true
+        target:
+          entity:
     actions:
       name: Actions
       description: Actions to execute, {{ trigger.event.data.new_state.name }} is replaced with
