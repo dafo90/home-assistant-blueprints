@@ -81,7 +81,7 @@ alias: Execute actions when an entity becomes unavailable
 description: ''
 trigger:
   - platform: time_pattern
-    minutes: "*/5"
+    minutes: "/5"
 action:
   - choose: []
     default: !input 'actions'
