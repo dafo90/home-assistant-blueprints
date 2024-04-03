@@ -47,7 +47,6 @@ blueprint:
         action: {}
 variables:
   exclude_entities: !input exclude_entities
-  minutes: !input minutes
   helper_last_unavailable_entities: !input helper_last_unavailable_entities
   domains:
     - binary_sensor
@@ -82,7 +81,7 @@ alias: Execute actions when an entity becomes unavailable
 description: ''
 trigger:
   - platform: time_pattern
-    minutes: "{{ '/' ~ minutes }}"
+    minutes: "*/{{ minutes }}"
 action:
   - choose: []
     default: !input 'actions'
