@@ -45,14 +45,6 @@ blueprint:
       description: "Actions to execute, the variable `new_unavailable_entities` is a list of all new unavailable `entity_id`s (to print the name: `{{ state_attr(entity_id, 'friendly_name') }}`)."
       selector:
         action: {}
-    max_queued:
-      name: Maximum queued notifications
-      description: A number, in case of multiple events, what should be the queue max depth, defaults to 10
-      default: 10
-      selector:
-        number:
-          min: 1
-          max: 100
 variables:
   exclude_entities: !input exclude_entities
   minutes: !input minutes
@@ -98,5 +90,4 @@ action:
     data:
       entity_id: !input helper_last_unavailable_entities
       value: "{{ unavailable_entities | to_json }}"
-mode: queued
-max: !input max_queued
+mode: single
