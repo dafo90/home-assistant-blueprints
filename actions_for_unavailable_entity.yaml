@@ -4,7 +4,7 @@ blueprint:
   source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/actions_for_unavailable_entity.yaml
   domain: automation
   input:
-    minutes:
+    cron_minutes:
       name: Frequency
       description: Set frequency in minutes to run the automation.
       default: 5
@@ -81,7 +81,7 @@ alias: Execute actions when an entity becomes unavailable
 description: ''
 trigger:
   - platform: time_pattern
-    minutes: "/5"
+    minutes: "/{{ cron_minutes }}"
 action:
   - choose: []
     default: !input 'actions'
