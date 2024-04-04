@@ -7,10 +7,11 @@ blueprint:
     water_sensor_entities:
       name: Water sensors
       selector:
-        target:
-          entity:
-            domain: binary_sensor
-            device_class: moisture
+        entity:
+          multiple: true
+          filter:
+            - domain: binary_sensor
+              device_class: moisture
     wet_actions:
       name: Wet actions
       description: Actions to execute when a water sensor becomes wet, {{ trigger.event.data.new_state.name }} is replaced with
