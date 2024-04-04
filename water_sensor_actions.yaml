@@ -1,0 +1,56 @@
+blueprint:
+  name: Execute actions when water sensor becomes wet
+  description: Execute actions when water sensor becomes wet
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/water_sensor_actions.yaml
+  domain: automation
+  input:
+    water_sensor_entities:
+      name: Water sensors
+      selector:
+        target:
+          entity:
+            domain: binary_sensor
+            device_class: moisture
+    wet_actions:
+      name: Wet actions
+      description: Actions to execute when a water sensor becomes wet, {{ trigger.event.data.new_state.name }} is replaced with
+        the water sensor entity name, {{ trigger.event.data.entity_id }} with the id.
+      selector:
+        action: {}
+    dry_actions:
+      name: Dry actions
+      description: Actions to execute when a water sensor becomes dry, {{ trigger.event.data.new_state.name }} is replaced with
+        the water sensor entity name, {{ trigger.event.data.entity_id }} with the id.
+      selector:
+        action: {}
+    max_queued:
+      name: Maximum queued notifications
+      description: A number, in case of multiple events, what should be the queue max depth, defaults to 10
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+
+trigger:
+  - platform: state
+    entity_id: !input water_sensor_entities
+    from:
+      - "on"
+      - "off"
+    to:
+      - "on"
+      - "off"
+
+action:
+  - if:
+      - "{{ trigger.event.data.new_state.state == 'on' }}"
+    then:
+      - choose: []
+        default: !input 'wet_actions'
+    else:
+      - choose: []
+        default: !input 'dry_actions'
+
+mode: queued
+max: !input max_queued
