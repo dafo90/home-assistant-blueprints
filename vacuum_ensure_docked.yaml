@@ -1,0 +1,51 @@
+blueprint:
+  name: Ensure the vacuum robot is docked
+  description: Ensure that on the specified days and at the specified time the vacuum robot is docked, otherwise it will be returned to base.
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_ensure_docked.yaml
+  domain: automation
+  input:
+    vacuum_entity:
+      name: Vacuum robot
+      selector:
+        entity:
+          domain: vacuum
+    check_time:
+      name: Check time
+      selector:
+        time:
+    days_of_week:
+      name: Days of the week
+      selector:
+        select:
+          multiple: true
+          options:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+    person_device_tracker:
+      name: Device to monitor the presence
+      selector:
+        entity:
+          domain: device_tracker
+
+trigger:
+  - platform: time
+    at: !input check_time
+
+condition:
+  - condition: time
+    weekday: !input days_of_week
+  - condition: not
+    conditions:
+      - condition: state
+        entity_id: !input vacuum_entity
+        state: "docked"
+
+action:
+  - service: vacuum.return_to_base
+    target:
+      entity_id: !input vacuum_entity

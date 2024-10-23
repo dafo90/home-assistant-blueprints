@@ -1,0 +1,68 @@
+blueprint:
+  name: Start emtying procedure for vacuum robot
+  description: The robot, every few weeks on a specific day and time, leaves the base and stops after a predetermined time interval. This procedure is useful in case the base is not easily accessible to empty the robot.
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_emtying_procedure.yaml
+  domain: automation
+  input:
+    vacuum_entity:
+      name: Vacuum robot
+      selector:
+        entity:
+          domain: vacuum
+    delay_time:
+      name: Time for the robot to leave the base (seconds)
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+          unit_of_measurement: seconds
+          mode: slider
+    start_time:
+      name: Start time
+      selector:
+        time:
+    day_of_week:
+      name: Day of the week
+      selector:
+        select:
+          options:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+    week_divisor:
+      name:
+      description: How often (weeks)
+      selector:
+        number:
+          min: 1
+          max: 10
+          unit_of_measurement: weeks
+          mode: slider
+
+trigger:
+  - platform: time
+    at: !input start_time
+
+condition:
+  - condition: state
+    entity_id: !input vacuum_entity
+    state: "docked"
+  - condition: time
+    weekday:
+      - !input day_of_week
+  - condition: template
+    value_template: "{{ (as_timestamp(now()) | timestamp_custom('%U') | int) % (input.week_divisor | int) == 0 }}"
+
+action:
+  - service: vacuum.start
+    target:
+      entity_id: !input vacuum_entity
+  - delay: "{{ input.delay_time | int }}"
+  - service: vacuum.stop
+    target:
+      entity_id: !input vacuum_entity

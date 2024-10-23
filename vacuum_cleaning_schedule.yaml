@@ -1,0 +1,53 @@
+blueprint:
+  name: Start vacuum robot to clean house
+  description: Start the robot to clean the whole house on the specified days and at the specified time, only if no one is home (based on phone presence). The robot will return to the base independently.
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_cleaning_schedule.yaml
+  domain: automation
+  input:
+    vacuum_entity:
+      name: Vacuum robot
+      selector:
+        entity:
+          domain: vacuum
+    start_time:
+      name: Start time
+      selector:
+        time:
+    days_of_week:
+      name: Days of the week
+      selector:
+        select:
+          multiple: true
+          options:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+    person_device_tracker:
+      name: Device to monitor the presence
+      selector:
+        entity:
+          domain: device_tracker
+
+trigger:
+  - platform: time
+    at: !input start_time
+
+condition:
+  - condition: time
+    weekday: !input days_of_week
+  - condition: state
+    entity_id: !input person_device_tracker
+    state: "not_home"
+  - condition: template
+    value_template: >
+      {{ state_attr(states[!input person_device_tracker].entity_id, 'reachable') is not defined or 
+         state_attr(states[!input person_device_tracker].entity_id, 'reachable') == true }}
+
+action:
+  - service: vacuum.start
+    target:
+      entity_id: !input vacuum_entity
