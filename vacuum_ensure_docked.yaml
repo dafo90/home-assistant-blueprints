@@ -26,11 +26,6 @@ blueprint:
             - fri
             - sat
             - sun
-    person_device_tracker:
-      name: Device to monitor the presence
-      selector:
-        entity:
-          domain: device_tracker
     battery_threshold:
       name: Battery threshold
       default: 10
