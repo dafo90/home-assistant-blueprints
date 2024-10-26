@@ -44,10 +44,6 @@ condition:
   - condition: state
     entity_id: !input person_device_tracker
     state: "not_home"
-  - condition: template
-    value_template: >
-      {{ state_attr(states[!input person_device_tracker].entity_id, 'reachable') is not defined or 
-         state_attr(states[!input person_device_tracker].entity_id, 'reachable') == true }}
 
 action:
   - service: vacuum.start
