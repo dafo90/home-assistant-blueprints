@@ -1,5 +1,5 @@
 blueprint:
-  name: Ensure the vacuum robot is docked
+  name: Vacuum robot - Ensure is docked
   description: Ensure that on the specified days and at the specified time (or when the battery is low) the vacuum robot is docked, otherwise it will be returned to base.
   source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_ensure_docked.yaml
   domain: automation

@@ -1,5 +1,5 @@
 blueprint:
-  name: Start emtying procedure for vacuum robot
+  name: Vacuum robot - Start emtying procedure
   description: The robot, every few weeks on a specific day and time, leaves the base and stops after a predetermined time interval. This procedure is useful in case the base is not easily accessible to empty the robot.
   source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_emptying_procedure.yaml
   domain: automation
