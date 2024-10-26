@@ -35,8 +35,7 @@ blueprint:
             - sat
             - sun
     week_divisor:
-      name:
-      description: How often (weeks)
+      name: How often (weeks)
       selector:
         number:
           min: 1
