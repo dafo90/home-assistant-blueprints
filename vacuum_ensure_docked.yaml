@@ -1,6 +1,6 @@
 blueprint:
   name: Ensure the vacuum robot is docked
-  description: Ensure that on the specified days and at the specified time the vacuum robot is docked, otherwise it will be returned to base.
+  description: Ensure that on the specified days and at the specified time (or when the battery is low) the vacuum robot is docked, otherwise it will be returned to base.
   source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/vacuum_ensure_docked.yaml
   domain: automation
   input:
@@ -31,10 +31,25 @@ blueprint:
       selector:
         entity:
           domain: device_tracker
+    battery_threshold:
+      name: Battery threshold
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 100
+          unit_of_measurement: "%"
+          mode: slider
+
+mode: single
 
 trigger:
   - platform: time
     at: !input check_time
+  - platform: numeric_state
+    entity_id: !input vacuum_entity
+    attribute: battery_level
+    below: !input battery_threshold
 
 condition:
   - condition: time

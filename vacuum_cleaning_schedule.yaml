@@ -32,6 +32,8 @@ blueprint:
         entity:
           domain: device_tracker
 
+mode: single
+
 trigger:
   - platform: time
     at: !input start_time

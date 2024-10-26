@@ -11,7 +11,7 @@ blueprint:
           domain: vacuum
     delay_time:
       name: Time for the robot to leave the base (seconds)
-      default: 5
+      default: 15
       selector:
         number:
           min: 1
@@ -43,6 +43,8 @@ blueprint:
           max: 10
           unit_of_measurement: weeks
           mode: slider
+
+mode: single
 
 trigger:
   - platform: time
