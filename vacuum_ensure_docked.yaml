@@ -35,23 +35,31 @@ blueprint:
           max: 100
           unit_of_measurement: "%"
           mode: slider
-    person_device_tracker:
-      name: Device to monitor the presence
+    person_device_trackers:
+      name: Devices to monitor the presence
       default: null
       selector:
+        multiple: true
+        default: []
         entity:
           domain: device_tracker
 
 mode: single
 
 variables:
-  person_device_tracker: !input person_device_tracker
+  person_device_trackers: !input person_device_trackers
 
 trigger:
   - platform: template
     value_template: >
-      {{ person_device_tracker is not none and is_state(person_device_tracker, 'home') and
-         trigger.to_state.state == 'home' and trigger.from_state.state != 'home' }}
+      {% for device in person_device_trackers %}
+        {% if is_state(device, 'home') and 
+              trigger.to_state.entity_id == device and 
+              trigger.from_state.state != 'home' %}
+          {{ true }}
+        {% endif %}
+      {% endfor %}
+      {{ false }}
   - platform: time
     at: !input check_time
   - platform: numeric_state

@@ -26,13 +26,18 @@ blueprint:
             - fri
             - sat
             - sun
-    person_device_tracker:
-      name: Device to monitor the presence
+    person_device_trackers:
+      name: Devices to monitor the presence
       selector:
+        multiple: true
+        default: []
         entity:
           domain: device_tracker
 
 mode: single
+
+variables:
+  person_device_trackers: !input person_device_trackers
 
 trigger:
   - platform: time
@@ -41,9 +46,14 @@ trigger:
 condition:
   - condition: time
     weekday: !input days_of_week
-  - condition: state
-    entity_id: !input person_device_tracker
-    state: "not_home"
+  - condition: template
+    value_template: >
+      {% for device in person_device_trackers %}
+        {% if not is_state(device, 'not_home') %}
+          {{ false }}
+        {% endif %}
+      {% endfor %}
+      {{ true }}
 
 action:
   - service: vacuum.start
