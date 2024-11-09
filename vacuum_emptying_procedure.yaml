@@ -45,6 +45,10 @@ blueprint:
 
 mode: single
 
+variables:
+  week_divisor: !input week_divisor
+  delay_time: !input delay_time
+
 trigger:
   - platform: time
     at: !input start_time
@@ -57,13 +61,13 @@ condition:
     weekday:
       - !input day_of_week
   - condition: template
-    value_template: "{{ (as_timestamp(now()) | timestamp_custom('%U') | int) % (input.week_divisor | int) == 0 }}"
+    value_template: "{{ (as_timestamp(now()) | timestamp_custom('%U') | int) % (week_divisor | int) == 0 }}"
 
 action:
   - service: vacuum.start
     target:
       entity_id: !input vacuum_entity
-  - delay: "{{ input.delay_time | int }}"
+  - delay: "{{ delay_time | int }}"
   - service: vacuum.stop
     target:
       entity_id: !input vacuum_entity
