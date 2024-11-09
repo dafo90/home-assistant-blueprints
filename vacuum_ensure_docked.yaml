@@ -39,8 +39,8 @@ blueprint:
       name: Devices to monitor the presence
       default: []
       selector:
-        multiple: true
         entity:
+          multiple: true
           domain: device_tracker
 
 mode: single
