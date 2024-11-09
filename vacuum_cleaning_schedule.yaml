@@ -28,9 +28,9 @@ blueprint:
             - sun
     person_device_trackers:
       name: Devices to monitor the presence
+      default: []
       selector:
         multiple: true
-        default: []
         entity:
           domain: device_tracker
 

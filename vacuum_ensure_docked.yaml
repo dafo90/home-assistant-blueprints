@@ -37,10 +37,9 @@ blueprint:
           mode: slider
     person_device_trackers:
       name: Devices to monitor the presence
-      default: null
+      default: []
       selector:
         multiple: true
-        default: []
         entity:
           domain: device_tracker
 
