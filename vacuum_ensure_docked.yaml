@@ -35,10 +35,23 @@ blueprint:
           max: 100
           unit_of_measurement: "%"
           mode: slider
+    person_device_tracker:
+      name: Device to monitor the presence
+      default: null
+      selector:
+        entity:
+          domain: device_tracker
 
 mode: single
 
+variables:
+  person_device_tracker: !input person_device_tracker
+
 trigger:
+  - platform: state
+    entity_id: !input person_device_tracker
+    to: "home"
+    enabled: "{{ person_device_tracker is not none }}"
   - platform: time
     at: !input check_time
   - platform: numeric_state
