@@ -48,10 +48,10 @@ variables:
   person_device_tracker: !input person_device_tracker
 
 trigger:
-  - platform: state
-    entity_id: !input person_device_tracker
-    to: "home"
-    enabled: "{{ person_device_tracker is not none }}"
+  - platform: template
+    value_template: >
+      {{ person_device_tracker is not none and is_state(person_device_tracker, 'home') and
+         trigger.to_state.state == 'home' and trigger.from_state.state != 'home' }}
   - platform: time
     at: !input check_time
   - platform: numeric_state
