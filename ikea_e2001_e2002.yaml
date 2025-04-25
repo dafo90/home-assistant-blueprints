@@ -17,7 +17,7 @@ blueprint:
 
     🚀 This blueprint is part of the **[Awesome HA Blueprints](https://epmatt.github.io/awesome-ha-blueprints) project**.
 
-    ℹ️ Version 2024.06.15
+    ℹ️ Version 2025.04.25
   source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/ikea_e2001_e2002.yaml
   domain: automation
   homeassistant:
