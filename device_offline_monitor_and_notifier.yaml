@@ -73,6 +73,7 @@ blueprint:
       description: >
         Actions to run when one or more devices become offline. The variable
         {{ devices }} contains the list of affected device names.
+      default: []
       selector:
         action: {}
 
@@ -81,6 +82,7 @@ blueprint:
       description: >
         Actions to run when one or more devices return online. The variable
         {{ devices }} contains the list of device names that recovered.
+      default: []
       selector:
         action: {}
 
@@ -155,13 +157,13 @@ action:
         {{ recovered_devices | map('device_attr','name') | list }}
 
   - choose:
-      - conditions: "{{ offline_device_names | length > 0 }}"
+      - conditions: "{{ offline_device_names | length > 0 and actions_offline | length > 0 }}"
         sequence:
           - variables:
               devices: "{{ offline_device_names }}"
           - sequence: !input actions_offline
 
-      - conditions: "{{ recovered_device_names | length > 0 }}"
+      - conditions: "{{ recovered_device_names | length > 0 and actions_online | length > 0 }}"
         sequence:
           - variables:
               devices: "{{ recovered_device_names }}"
