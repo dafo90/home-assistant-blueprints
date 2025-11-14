@@ -159,14 +159,12 @@ action:
         sequence:
           - variables:
               devices: "{{ offline_device_names }}"
-          - choose: []
-            default: !input actions_offline
+          - sequence: !input actions_offline
 
       - conditions: "{{ recovered_device_names | length > 0 }}"
         sequence:
           - variables:
               devices: "{{ recovered_device_names }}"
-          - choose: []
-            default: !input actions_online
+          - sequence: !input actions_online
 
 mode: single
