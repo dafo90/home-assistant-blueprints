@@ -1,0 +1,172 @@
+blueprint:
+  name: Device offline monitor & notifier
+  description: >
+    Regularly checks all devices every desired number of minutes and sends a
+    notification when any device remains unavailable longer than the
+    inactivity threshold, and when previously offline devices return online
+    after being stable for at least the configured activity threshold. Supports
+    include and exclude lists with priority for included entities.
+
+  domain: automation
+  source_url: https://github.com/dafo90/home-assistant-blueprints/blob/master/device_offline_monitor_and_notifier.yaml
+
+  input:
+    check_interval:
+      name: Check interval
+      description: "How often to test device availability (1–10 minutes)."
+      selector:
+        number:
+          min: 1
+          max: 10
+          unit_of_measurement: minutes
+          mode: slider
+      default: 5
+
+    inactivity_threshold:
+      name: Offline inactivity threshold
+      description: >
+        Number of minutes an entity must remain unavailable before its device
+        is considered offline. (1–30 minutes)
+      selector:
+        number:
+          min: 1
+          max: 30
+          unit_of_measurement: minutes
+          mode: slider
+      default: 15
+
+    activity_threshold:
+      name: Online activity threshold
+      description: >
+        Number of minutes a device must remain available before it triggers
+        the "back online" action. (1–30 minutes)
+      selector:
+        number:
+          min: 1
+          max: 30
+          unit_of_measurement: minutes
+          mode: slider
+      default: 10
+
+    included_entities:
+      name: Included entities
+      description: >
+        If one or more entities are selected here, ONLY these will be monitored.
+        Overrides the excluded entities list.
+      default: []
+      selector:
+        entity:
+          multiple: true
+
+    excluded_entities:
+      name: Excluded entities
+      description: >
+        Entities to ignore entirely. Only applies if no included entities
+        are defined.
+      default: []
+      selector:
+        entity:
+          multiple: true
+
+    actions_offline:
+      name: Actions when devices go offline
+      description: >
+        Actions to run when one or more devices become offline. The variable
+        {{ devices }} contains the list of affected device names.
+      selector:
+        action: {}
+
+    actions_online:
+      name: Actions when devices return online
+      description: >
+        Actions to run when one or more devices return online. The variable
+        {{ devices }} contains the list of device names that recovered.
+      selector:
+        action: {}
+
+variables:
+  included_entities: !input included_entities
+  excluded_entities: !input excluded_entities
+
+  all_entities: >
+    {{ states | map(attribute='entity_id') | list }}
+
+  # Priority logic
+  final_entities_to_check: >
+    {% if included_entities | length > 0 %}
+      {{ included_entities }}
+    {% else %}
+      {{ all_entities | reject('in', excluded_entities) | list }}
+    {% endif %}
+
+  inactivity_threshold: !input inactivity_threshold
+  activity_threshold: !input activity_threshold
+
+  now_ts: "{{ now().timestamp() }}"
+
+trigger:
+  - platform: time_pattern
+    minutes: "/{{ check_interval }}"
+
+action:
+  - variables:
+      offline_entities: >
+        {{ final_entities_to_check
+          | map('states')
+          | selectattr('state','eq','unavailable')
+          | list }}
+
+      online_entities: >
+        {{ final_entities_to_check
+          | map('states')
+          | selectattr('state','ne','unavailable')
+          | list }}
+
+      offline_devices: >
+        {% set out = [] %}
+        {% for e in offline_entities %}
+          {% set minutes = (now() - e.last_changed).total_seconds() / 60 %}
+          {% if minutes >= inactivity_threshold %}
+            {% set d = device_id(e.entity_id) %}
+            {% if d %}
+              {% set out = out + [ d ] %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {{ out | unique }}
+
+      recovered_devices: >
+        {% set out = [] %}
+        {% for e in online_entities %}
+          {% set minutes = (now() - e.last_changed).total_seconds() / 60 %}
+          {% if minutes >= activity_threshold %}
+            {% set d = device_id(e.entity_id) %}
+            {% if d %}
+              {% set out = out + [ d ] %}
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {{ out | unique }}
+
+      offline_device_names: >
+        {{ offline_devices | map('device_attr','name') | list }}
+
+      recovered_device_names: >
+        {{ recovered_devices | map('device_attr','name') | list }}
+
+  - choose:
+      - conditions: "{{ offline_device_names | length > 0 }}"
+        sequence:
+          - variables:
+              devices: "{{ offline_device_names }}"
+          - choose: []
+            default: !input actions_offline
+
+      - conditions: "{{ recovered_device_names | length > 0 }}"
+        sequence:
+          - variables:
+              devices: "{{ recovered_device_names }}"
+          - choose: []
+            default: !input actions_online
+
+mode: single
