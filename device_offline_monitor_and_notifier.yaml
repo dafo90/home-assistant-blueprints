@@ -79,15 +79,17 @@ variables:
   included_entities: !input included_entities
   excluded_entities: !input excluded_entities
 
-  all_entities: >
-    {{ states | map(attribute='entity_id') | list }}
+  all_entity_ids: >
+    {{ states
+      | rejectattr('domain', 'in', ['button', 'event', 'group', 'image', 'input_button', 'input_text', 'remote', 'tts', 'scene', 'stt', 'conversation'])
+      | list }}
 
   # Priority logic
   final_entities_to_check: >
     {% if included_entities | length > 0 %}
-      {{ included_entities }}
+      {{ all_entity_ids | selectattr('entity_id', 'in', included_entities) | list }}
     {% else %}
-      {{ all_entities | reject('in', excluded_entities) | list }}
+      {{ all_entity_ids | rejectattr('entity_id', 'in', excluded_entities) | list }}
     {% endif %}
 
   inactivity_threshold: !input inactivity_threshold
@@ -103,41 +105,39 @@ action:
   - variables:
       offline_entities: >
         {{ final_entities_to_check
-          | map('states')
           | selectattr('state','eq','unavailable')
           | list }}
 
       online_entities: >
         {{ final_entities_to_check
-          | map('states')
           | selectattr('state','ne','unavailable')
           | list }}
 
       offline_devices: >
-        {% set out = [] %}
+        {% set data = namespace(device_ids=[]) %}
         {% for e in offline_entities %}
           {% set minutes = (now() - e.last_changed).total_seconds() / 60 %}
           {% if minutes >= inactivity_threshold %}
             {% set d = device_id(e.entity_id) %}
             {% if d %}
-              {% set out = out + [ d ] %}
+              {% set data.device_ids = data.device_ids + [d] %}
             {% endif %}
           {% endif %}
         {% endfor %}
-        {{ out | unique }}
+        {{ data.device_ids | unique | list }}
 
       recovered_devices: >
-        {% set out = [] %}
+        {% set data = namespace(device_ids=[]) %}
         {% for e in online_entities %}
           {% set minutes = (now() - e.last_changed).total_seconds() / 60 %}
           {% if minutes >= activity_threshold %}
             {% set d = device_id(e.entity_id) %}
             {% if d %}
-              {% set out = out + [ d ] %}
+              {% set data.device_ids = data.device_ids + [d] %}
             {% endif %}
           {% endif %}
         {% endfor %}
-        {{ out | unique }}
+        {{ data.device_ids | unique | list }}
 
       offline_device_names: >
         {{ offline_devices | map('device_attr','name') | list }}
