@@ -94,19 +94,27 @@ variables:
       "conversation",
     ]
 
-  # Priority logic
   final_entities_to_check: >
-    {% if included_entities | length > 0 %}
-      {{ states
-        | rejectattr('domain', 'in', excluded_domains)
-        | selectattr('entity_id', 'in', included_entities)
-        | list }}
-    {% else %}
-      {{ states
-        | rejectattr('domain', 'in', excluded_domains)
-        | rejectattr('entity_id', 'in', excluded_entities)
-        | list }}
-    {% endif %}
+    {% set data = namespace(simplified_entities=[]) %}
+    {% for e in states
+                | rejectattr('domain', 'in', excluded_domains)
+                | list %}
+      {# 
+        Include this entity if either:
+        1. The included_entities list has items and this entity_id is in it, 
+          OR
+        2. The entity_id is not in the excluded_entities list
+      #}
+      {% if (included_entities | length > 0 and e.entity_id in included_entities) 
+        or (e.entity_id not in excluded_entities) %}
+        {% set data.simplified_entities = data.simplified_entities + [{
+              'entity_id': e.entity_id,
+              'state': e.state,
+              'last_changed': e.last_changed
+            }] %}
+      {% endif %}
+    {% endfor %}
+    {{ data.simplified_entities }}
 
   inactivity_threshold: !input inactivity_threshold
   activity_threshold: !input activity_threshold
